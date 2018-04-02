@@ -8,7 +8,7 @@ from web_lib.parser.HtmlParser import HtmlParser
 
 class documentParser:
 	'''
-	This class is a document parser
+	对HtmlParser的进一步封装，增加异常处理，提高容错性，同时三个常用函数保留
 	'''
 	def __init__(self,Response):
 		try:

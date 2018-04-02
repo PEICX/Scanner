@@ -16,12 +16,9 @@ DEFAULT_ENCODING = "utf-8" # 编码
 # platforms.C_FORCE_ROOT = True
 
 
-
-
-
 # 'default_user_agent' or 'random_user_agent'
 USER_AGENT = 'random_user_agent'
-# COOKIES为True时，则跟踪cookie
+# COOKIES为True时，则跟踪cookie，此功能暂时失效
 COOKIES = True
 PROXIES = ""
 

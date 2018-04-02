@@ -60,6 +60,7 @@ class page_404:
 
 
 def is_404(http_response):
+    # 输入为Reponse类，判断是否是404页面
     if page_404._instance is None:
         page_404._instance = page_404()
     return page_404._instance.is_404(http_response)

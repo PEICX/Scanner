@@ -12,7 +12,7 @@ from web_lib.parser.lru import LRU
 
 class dpCache:
     '''
-    This class is a document parser cache.
+    缓存池，缓存30个，解析之前，取body的hash，先看看缓存中有没有
     '''
     def __init__(self):
         self._cache = LRU(30)

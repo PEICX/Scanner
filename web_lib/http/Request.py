@@ -11,7 +11,9 @@ from web_lib.utils.UserAgent import get_useragent
 
 
 class Request(object):
-
+    '''
+    传入一个URL对象，默认是GET方法，对他进行进一步封装，便于cur类的send_req方法直接使用进行请求
+    '''
     DEFAULT_USER_AGENT = get_useragent()
 
     def __init__(self,url,method='GET',headers=None,cookies=None,referer=None,data=None,user_agent=DEFAULT_USER_AGENT,**kwargs):
@@ -35,7 +37,7 @@ class Request(object):
         self._referer = referer
 
         self._user_agent = user_agent
-
+        # 在headers中直接传cookie方便，使用cookie参数变量传输，需保证cookie是一个dict，格式化麻烦还容易出错
         if self._cookies:
             self._headers.update({"Cookie": self._cookies})
 

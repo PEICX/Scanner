@@ -39,7 +39,7 @@ def is_contain_list(lista, listb):
 
 
 def is_similar_url(urla, urlb):
-    # url是否相似和包含
+    # 判断url是否相似和包含
     if not isinstance(urla,URL):
         urla = URL(urla)
 
@@ -58,13 +58,14 @@ def is_similar_url(urla, urlb):
 
 
 def is_similar_page(res1, res2, radio=3):
-
+    # 使用simHash判断页面的相似程度
     if res1 is None or res2 is None:
         return False
 
     body1 = res1.body
     body2 = res2.body
 
+    # 此处非常耗时，大概是split函数费时
     simhash1 = Simhash(body1.split())
     simhash2 = Simhash(body2.split())
 

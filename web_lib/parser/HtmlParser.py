@@ -3,7 +3,7 @@
 __author__ = 'PEICX'
 __date__ = '2018/3/28 10:04'
 
-import re, urllib, traceback
+import re, traceback
 
 from utils.LogManager import log as logging
 from settings import DEFAULT_ENCODING
@@ -14,7 +14,10 @@ from web_lib.utils.smart_fill import smart_fill
 from web_lib.http.Data import postData
 
 class HtmlParser():
-
+    '''
+    直接解析自己封装的Response类；
+    这个类 以lxml.etree的事件驱动写的，遇到标签自动调用start，end等函数；
+    '''
 
     URL_HEADERS = ('location')
     URL_TAGS = (

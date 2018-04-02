@@ -6,7 +6,7 @@ __date__ = '2018/3/29 22:14'
 '''
 网站前的协议就不要加了，如https，会显示ssl错误，有空在修改这个吧
 '''
-import time, itertools, traceback
+import time, itertools
 from queue import Queue
 
 from utils.LogManager import log
@@ -16,6 +16,7 @@ from web_lib.http.URL import URL
 from web_lib.utils.page_404 import is_404
 from web_lib.http.downloadUrl import curl
 from web_lib.parser.dpCache import dpc
+from web_lib.utils.url_filter import Filter
 
 
 class Crawler(object):
@@ -33,11 +34,7 @@ class Crawler(object):
 
         self._url_list = []
 
-        self._already_visit_url = set()
-
-        self._already_seen_urls = set()
-
-        self._already_send_reqs = set()
+        self.seen = Filter()
 
         self._relate_ext = ['html', 'shtm', 'htm', 'shtml']
 
@@ -50,7 +47,7 @@ class Crawler(object):
         self.num_urls = 0
 
         self.num_reqs = 0
-
+        # 保存所有爬到的url
         self._wRequestList = []
 
         self._start_time = None
@@ -67,11 +64,17 @@ class Crawler(object):
         return diff / 60
 
     def _do_with_reqs(self, reqs):
-
+        '''
+        过滤相似和包含的请求
+        传入一个内容是url的list（列表内已去重），返回过滤相似和包含后的url list
+        '''
         result = []
-        count = len(reqs)
-
-        if reqs is None or count == 0:
+        try:
+            count = len(reqs)
+        except Exception:
+            print("crawler, line75, object of type 'NoneType' has no len()")
+            return result
+        if count == 0:
             return result
 
         for i in range(count):
@@ -89,58 +92,46 @@ class Crawler(object):
         return result
 
     def _get_reqs_from_resp(self, response):
-
-        new_reqs = []
-
+        '''
+        :param response: 输入的参数是curl请求返回的Response类；
+        使用HtmlParser方法提取响应中所有的url
+        :return: 返回一个包含url的list
+        '''
+        new_reqs = [] # 临时保存本次解析响应正文得到的url
         try:
             doc_parser = dpc.getDocumentParserFor(response)
-
         except Exception as e:
-
             pass
-
         else:
-
             re_urls, tag_urls = doc_parser.get_get_urls()
-
             form_reqs = doc_parser.get_form_reqs()
-
             seen = set()
-
             for new_url in itertools.chain(re_urls, tag_urls):
-
                 if new_url in seen:
                     continue
-
                 seen.add(new_url)
-
                 if new_url.get_host() != self._target_domain:
                     if new_url.get_host() not in self._other_domains:
                         self._other_domains.add(new_url.get_host())
                     continue
-
                 if new_url not in self._url_list:
-
                     self._url_list.append(new_url)
-
                     wreq = self._url_to_req(new_url, response)
-
                     if wreq not in self._wRequestList:
                         new_reqs.append(wreq)
-
                         self._wRequestList.append(wreq)
 
             for item in form_reqs:
-
                 if item not in self._wRequestList:
                     new_reqs.append(item)
-
                     self._wRequestList.append(item)
-
             return new_reqs
 
     def _url_to_req(self, new_url, response, method="GET"):
-
+        '''
+        输入url，返回一个Request类，便于直接请求；
+        同时根据传入的response设置请求的referer和cookies
+        '''
         req = Request(new_url)
         req.set_method(method)
 
@@ -199,44 +190,36 @@ class Crawler(object):
                 print("reqs num limit break")
                 break
 
-            if this_req.get_url() in self._already_send_reqs:
+            # 此处url去重，未访问过会自动加入set中
+            if self.seen.request_seen(this_req):
                 continue
+
+            log.info("%s Request:%s" % (this_req.get_method(), this_req.get_url().url_string))
+
+            response = None
 
             try:
-                self._already_send_reqs.add(this_req.get_url())
-
-                log.info("%s Request:%s" % (this_req.get_method(), this_req.get_url().url_string))
-
-                response = None
-
-                try:
-                    response = curl.send_req(this_req)
-
-                except Exception as e:
-                    print(str(e))
-                    pass
-
-                if is_404(response):
-                    continue
-
-                if response is None:
-                    continue
-                # 获取HTTP响应中的请求
-                new_reqs = self._get_reqs_from_resp(response)
-                # 过滤相似和包含的请求
-                filter_reqs = self._do_with_reqs(new_reqs)
-
-                depth = depth + 1
-                for req in filter_reqs:
-                    q.put((req, depth))
-
-                self.num_reqs = len(self._already_send_reqs)
-                log.info("Already Send Reqs:" + str(self.num_reqs) + " Left Reqs:" + str(q.qsize()))
-
+                response = curl.send_req(this_req)
             except Exception as e:
-                traceback.print_exc()
-                log.info("ERROR: Can't process url '%s' (%s)" % (this_req.get_url(), e))
+                print(str(e))
+                pass
+
+            if is_404(response):
                 continue
+
+            if response is None:
+                continue
+            # 获取HTTP响应中的请求
+            new_reqs = self._get_reqs_from_resp(response)
+            # 过滤相似和包含的请求
+            filter_reqs = self._do_with_reqs(new_reqs)
+
+            depth = depth + 1
+            for req in filter_reqs:
+                q.put((req, depth))
+
+            self.num_reqs = self.seen.get_len()
+            log.info("Already Send Reqs:" + str(self.num_reqs) + " Left Reqs:" + str(q.qsize()))
 
             time.sleep(self._sleeptime)
 

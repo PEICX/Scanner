@@ -17,7 +17,7 @@ SP = ' '
 
 
 def from_requests_response(res, req_url):
-
+    # 此处传入的res是原始request请求后的返回值
     code = res.status_code
     msg = res.reason
     headers = res.headers
