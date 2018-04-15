@@ -15,10 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf.urls import url
-from myapp.views import DoForm, Form
+from myapp.views import *
 
 urlpatterns = [
     url('admin/', admin.site.urls),
-    url(r'^form_action/$', DoForm.as_view(), name='form_action'),
-    url(r'^form/$', Form.as_view(), name='form'),
+    url(r'^$', IndexView.as_view(), name="index"),
+    url(r'^scan$', ScanView.as_view(), name="scan"),
+    url(r'^about$', AboutView.as_view(), name="about"),
+    url(r'^help$', HelpView.as_view(), name="help"),
+
 ]
+
+
+
+# 全局404界面
+handler404 = page_not_found
+handler500 = page_error
+handler403 = permission_denied

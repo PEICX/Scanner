@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="shortcut icon" href="https://www.zoomeye.org/static/public/favicon.ico">
+    <link rel="stylesheet" href="/static/css/default.min.css">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="/static/css/main.d8bf4b61.css" rel="stylesheet"></head>
+
+  <body>
+    <div id="appZoomEye">
+      <div class="appZoomEye">
+        <div class="home" style="background-image: url(&quot;./static/images/bg.fdc3b372.jpg&quot;);">
+          <div class="header" style="background: transparent;">
+            <div class="header-content content-width clear">
+              <div class="header-left">
+                <a href="/" style="padding-left: 0px;">
+                  <img src="/static/images/home.a277a0b7.svg" class="header-home header-icon" alt="home"></a>
+
+                  <a href="/">探索</a>
+                <a href="/scan">扫描</a>
+                <a href="/help">帮助</a></div>
+              <div class="header-more">
+                <a href="/about">关于</a></div>
+              <div class="header-right">
+                <div class="header-profile-link">
+                  <a href="/admin">
+                    <img src="/static/images/profile.622b8052.svg" class="header-icon header-icon-profile" alt="more"></a>
+                </div>
+              </div>
+            </div>
+          </div>
+            {% block body %}{% endblock %}
+
+        </div>
+      </div>
+    </div>
+
+  </body>
+
+</html>
